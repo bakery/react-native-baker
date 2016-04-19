@@ -1,0 +1,34 @@
+import { takeEvery } from 'redux-saga';
+import { put, call } from 'redux-saga/effects';
+import Parse from 'parse/react-native';
+import {
+  LOAD_DATA,
+  DATA_LOADED,
+  FAILED_TO_LOAD_DATA,
+} from '<PATH_TO_CONSTANTS_MODULE>';
+
+const ParseClassName = '<PARSE_CLASS_NAME>';
+
+function* _{{camelCase name}}(action) {
+  try {
+    const query = new Parse.Query(ParseClassName);
+    const movies = yield call([query, query.find]);
+    yield put({
+      type: DATA_LOADED,
+      payload: {
+        items: movies.map((i) => i.toJSON()),
+      },
+    });
+  } catch (e) {
+    yield put({
+      type: FAILED_TO_LOAD_DATA,
+      payload: {
+        error: e,
+      },
+    });
+  }
+}
+
+export function* {{camelCase name}}() {
+  yield* takeEvery(LOAD_DATA, _{{camelCase name}});
+}
