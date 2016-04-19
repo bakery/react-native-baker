@@ -2,68 +2,79 @@
  * Component Generator
  */
 
+const path = require('path');
 const componentExists = require('../utils/componentExists');
 const specifyPlatform = require('../utils/specifyPlatform');
+const templates = require('../utils/templates');
 
-module.exports = {
-  description: 'Add an unconnected component',
-  prompts: [
-  // {
-  //   type: 'list',
-  //   name: 'type',
-  //   message: 'Select the type of component',
-  //   default: 'Stateless Function',
-  //   choices: () => ['ES6 Class', 'Stateless Function'],
-  // },
-    {
-      type: 'input',
-      name: 'name',
-      message: 'What should it be called?',
-      default: 'Button',
-      validate: value => {
-        if ((/.+/).test(value)) {
-          return componentExists(value) ? 'A component or container with this name already exists' : true;
-        }
+module.exports = function(plop) {
 
-        return 'The name is required';
+  // plop.addHelper('renderTemplate', function (templateName, data) {
+  //   const templateFilePath = path.resolve(
+  //     `./baker/generators/component/templates/${templateName}.js.hbs`
+  //   );
+
+  //   return plop.renderString(
+  //     templates.getTemplateContent(templateFilePath),
+  //     data || {}
+  //   );
+  // });
+
+  return {
+    description: 'Add an unconnected component',
+    prompts: [
+      {
+        type: 'input',
+        name: 'name',
+        message: 'What should it be called?',
+        default: 'Button',
+        validate: value => {
+          if ((/.+/).test(value)) {
+            return componentExists(value) ? 'A component or container with this name already exists' : true;
+          }
+
+          return 'The name is required';
+        },
       },
+      // {
+      //   type: 'list',
+      //   name: 'templateName',
+      //   message: 'Select component template',
+      //   default: 'vanila',
+      //   choices: () => {
+      //     return templates.listAvailableTemplateNames(
+      //       path.resolve('./baker/generators/component/templates')
+      //     );
+      //   }
+      // },
+      {
+        type: 'confirm',
+        name: 'platformSpecific',
+        default: false,
+        message: 'Do you want separate iOS and Android versions?',
+      }
+    ],
+    actions: data => {
+      const actions = [];
+      const platforms = data.platformSpecific ? ['ios','android'] : [''];
+
+      platforms.forEach((platform) => {
+        actions.push({
+          type: 'add',
+          path: specifyPlatform('../../src/components/{{properCase name}}/index.js', platform),
+          templateFile: './component/component.js.hbs',
+          abortOnFail: true,
+        });
+
+        actions.push({
+          type: 'add',
+          path: specifyPlatform('../../src/components/{{properCase name}}/styles.js', platform),
+          templateFile: './common/styles.js.hbs',
+          abortOnFail: true,
+        });
+      });
+
+      return actions;
     },
-    {
-      type: 'confirm',
-      name: 'platformSpecific',
-      default: false,
-      message: 'Do you want separate iOS and Android versions?',
-    }
-  ],
-  actions: data => {
-    const actions = [];
-    const platforms = data.platformSpecific ? ['ios','android'] : [''];
-
-    platforms.forEach((platform) => {
-      actions.push({
-        type: 'add',
-        path: specifyPlatform('../../src/components/{{properCase name}}/index.js', platform),
-        templateFile: './component/component.js.hbs',
-        abortOnFail: true,
-      });
-
-      actions.push({
-        type: 'add',
-        path: specifyPlatform('../../src/components/{{properCase name}}/styles.js', platform),
-        templateFile: './common/styles.js.hbs',
-        abortOnFail: true,
-      });
-    });
-
-
-    // TODO: tests
-    // {
-    //   type: 'add',
-    //   path: '../../src/components/{{properCase name}}/index.test.js',
-    //   templateFile: './component/test.js.hbs',
-    //   abortOnFail: true,
-    // }
-
-    return actions;
-  },
+  };
 };

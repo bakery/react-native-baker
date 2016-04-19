@@ -11,12 +11,18 @@ const appGenerator = require('./app/index.js');
 const sagaGenerator = require('./saga/index.js');
 
 module.exports = (plop) => {
+
+  const loadGenerator = (generator) => {
+    return typeof generator === 'function' ?
+      generator.call(null, plop) : generator;
+  };
+
   if (isRNInitialized()) {
-    plop.setGenerator('component', componentGenerator);
-    plop.setGenerator('container', containerGenerator);
-    plop.setGenerator('saga', sagaGenerator);
+    plop.setGenerator('component', loadGenerator(componentGenerator));
+    plop.setGenerator('container', loadGenerator(containerGenerator));
+    plop.setGenerator('saga', loadGenerator(sagaGenerator));
   } else {
-    plop.setGenerator('app', appGenerator);
+    plop.setGenerator('app', loadGenerator(appGenerator));
   }
 
   // plop.setGenerator('selector', selectorGenerator);
