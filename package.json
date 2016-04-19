@@ -17,6 +17,7 @@
   "dependencies": {
     "express": "^4.13.4",
     "immutable": "^3.8.0",
+    "parse": "^1.8.3",
     "parse-dashboard": "^1.0.9",
     "parse-server": "^2.2.7",
     "react": "^0.14.8",
