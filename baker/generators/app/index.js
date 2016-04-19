@@ -1,8 +1,10 @@
+/* globals which, rm */
+
 /**
  * Container Generator
  */
 
-// const fs = require('fs');
+require('shelljs/global');
 
 const specifyPlatform = require('../utils/specifyPlatform');
 const path = require('path');
@@ -24,6 +26,13 @@ module.exports = {
   actions: data => {
     const platforms = ['ios','android'];
     const actions = [
+      function killCurrentGitIgnore() {
+        const currentGitIgnore = path.resolve(process.cwd(),'.gitignore');
+        if (which(currentGitIgnore)) {
+          rm(currentGitIgnore);
+        }
+        return 'ok';
+      },
       function setupReactNativeApp(answers) {
         var execFileSync = require('child_process').execFileSync;
         execFileSync(path.resolve(process.cwd(), 'baker/generators/utils/initRn.js'), [answers.name]);
@@ -40,6 +49,13 @@ module.exports = {
         templateFile: './app/index.js.hbs',
         abortOnFail: true,
       });
+    });
+
+    actions.push({
+      type: 'modify',
+      path: '../../.gitignore',
+      pattern: /()^.*/gi,
+      templateFile: './app/.gitignore.hbs',
     });
 
     return actions;
